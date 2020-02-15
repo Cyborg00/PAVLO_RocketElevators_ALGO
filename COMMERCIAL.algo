@@ -1,0 +1,274 @@
+                                'WELCOME TO ROCKET ELEVATORS PSEUDO CODE FOR RESIDENTIAL BUILDING'                    
+                                  '     Developped by Lou Casenaz & Pavlo Gordiy & ALEXI'
+                        '----------------------------------------------------------------------'
+                            '----------------------------- READY --------------------------'   
+'----------------------------------BATTERY-START + OBJECTS---------------------------------------------------'
+SEQUENCE StartBattery
+                            GroundFloor = 0
+                            floors = 66
+                            Elevators = 12
+                            columns = 4
+                            cages_per_column = 3
+                            Max_capacity = 3500Lbs
+                            ElevatorState = UP OR DOWN OR IDLE
+                            UserWantedElevatorState = UP OR DOWN
+                            ElevatorStatus = DISABLED OR MOVING OR STOPPED
+        CALL Battery THEN
+        SET Battery State TO on
+        SET Elevators to GroundFloor AND ElevatorState to IDLE
+        READ Weight_sensor
+        SET Doors to closed
+        SET lights to on
+        SET FloorDisplay to on
+        SET KeyPad to on
+        SET ElevatorCallButtons to on
+        READ FloorList
+        END SEQUENCE
+'---------------END-------------------BATTERY-START + OBJECTS---------------------------------------------------'
+
+
+
+'---------------------REQUEST-ELEVATOR-----------------------------------------------------------'  
+SEQUENCE RequestElevator USING ElevatorState AND Floor 
+        WHEN The CallButton Is Pressed
+        CALL An Elevator to The button Location
+END SEQUENCE
+'----------END-------REQUEST-ELEVATOR-----------------------------------------------------------'  
+
+
+
+'---------------------CALL-REQUEST-FLOOR-----------------------------------------------------------'  
+SEQUENCE CallRequestFloor USING Elevator AND RequestedFloor
+        IF The Floor Where the Elevator IS Requested IS BETWEEN 1 AND -6 THEN
+            COMPUTE The Number Of Floors Between All The Elevators OF Column 1 And Where the Button has been Pressed 
+            THEN
+        READ The result THEN READ The FloorList OF All Elevators THEN
+            DETERMINE The Best Elevator to Send TO The Request From Column 1 BY Returning The Elevator With
+                        The Shortest Floor List AND The Shortest Distance AND The Least Weight
+        ELSE 
+
+        IF The Floor Where the Elevator IS Requested IS BETWEEN 2 AND 20 THEN
+            COMPUTE The Number Of Floors Between All The Elevators OF Column 2 And Where the Button has been Pressed THEN
+                READ The result AND Return The Nearest Elevator From Column 2 TO The Button Location
+        ELSE 
+
+        IF The Floor Where the Elevator IS Requested IS BETWEEN 21 AND 40 THEN
+            COMPUTE The Number Of Floors Between All The Elevators OF Column 2 And Where the Button has been Pressed THEN
+                READ The result AND Return The Nearest Elevator From Column 3 TO the Button Location
+        ELSE
+        
+        IF The Floor Where the Elevator IS Requested IS BETWEEN 41 AND 60 THEN
+            COMPUTE The Number Of Floors Between All The Elevators OF Column 2 And Where the Button has been Pressed THEN
+                READ The result AND Return The Nearest Elevator From Column 4 TO The Button Location
+        END IF
+        END IF
+        END IF
+        END IF
+END SEQUENCE
+'------------END---------CALL-REQUEST-FLOOR-----------------------------------------------------------'  
+
+
+
+'---------------------ENABLE-THE-CALL-BOUTTON-----------------------------------------------------------'  
+SEQUENCE EnableCallButton USING ElevatorState AND Floor
+    WHEN The callButton Is Pressed INIT The callButton
+END SEQUENCE
+'--------END----------ENABLE-THE-CALL-BOUTTON-----------------------------------------------------------'  
+
+
+
+'---------------------DISABLE-THE-CALL-BOUTTON-----------------------------------------------------------'  
+SEQUENCE DisableCallButton USING ElevatorState AND Floor
+    CALL The CallButton Pressed on and Disable it
+END SEQUENCE
+'--------END----------DISABLE-THE-CALL-BOUTTON-----------------------------------------------------------'  
+
+
+
+'---------------------LOCATE-THE-CALL-BOUTTON-----------------------------------------------------------'  
+SEQUENCE LocateCallButton USING ElevatorState AND Floor 
+    WHEN The CallButton IS Pressed Determine The Number Of Floors Between 
+END SEQUENCE
+'-------------END------LOCATE-THE-CALL-BOUTTON-----------------------------------------------------------'  
+
+
+
+'-------------------ACTIVATE-THE-KEYPAD-----------------------------------------------------------'  
+SEQUENCE ActivateKeypad FOR Elevator
+    When The Battery Is init Enable The Keypad
+END SEQUENCE
+'------------END-------ACTIVATE-THE-KEYPAD-----------------------------------------------------------'  
+
+
+'-------------------DEACTIVATE-KEYPAD-----------------------------------------------------------'  
+SEQUENCE DeactivateKeyPad FOR Elevator
+    IF The Elevator is DISABLED THEN
+    Disable The Keypad
+    END IF
+END SEQUENCE
+'-----------END--------DEACTIVATE-KEYPAD-----------------------------------------------------------'  
+
+
+
+'-------------------KEYPAD-INPUTS-----------------------------------------------------------'  
+SEQUENCE  Keypad_Input
+    FOR EACH digits IN Keypad = -6 TO 60
+    READ INPUT AS FloorRequested
+    END FOR 
+END SEQUENCE
+'------------END-------KEYPAD-INPUTS-----------------------------------------------------------'  
+
+
+
+'-------------------SLOW-DOWN-ELEVATOR-----------------------------------------------------------'  
+SEQUENCE SlowDownElevator USING RequestedFloor AND Elevator CurrentFloor
+    WHEN The Elevator is almost arrived at the FloorRequested Slow Down The Elevator
+END SEQUENCE
+'------------END-------SLOW-DOWN-ELEVATOR-----------------------------------------------------------'  
+
+
+
+'-------------------CREATE-FLOOR-LIST-----------------------------------------------------------'  
+SEQUENCE CreateFloorList USING RequestedFloor AND Elevator
+    WHEN Someone Request a Floor In The Elevator
+    ADD The RequestedFloor to The Elevator FloorList
+END SEQUENCE
+'-----------END--------CREATE-FLOOR-LIST-----------------------------------------------------------'  
+
+
+
+'---------------------------DOORS------------------------------------------------------------'  
+SEQUENCE Open_close_Doors USING Elevator AND Doors
+    WHEN The Elevator IS Stopped
+        Open The Elevator Doors 
+        ELSE
+    IF The Elevator IS MOVING THEN
+        Close The Elevator Doors UNTIL The Elevator IS Stopped
+        END IF
+END SEQUENCE
+
+
+SEQUENCE CloseDoors FOR Elevator
+    IF there is no object or Person between the Doors AND Weight < Max_capacity THEN 
+        Wait 4 seconds THEN 
+        Close the Doors
+    END FOR
+    END IF
+END SEQUENCE
+
+
+SEQUENCE OpenDoors FOR Elevator
+    IF The Current Floor Of the elevator is the same as the Floor Requested AND The Elevator Is Stopped THEN
+        Open The Elevator Doors
+    END FOR
+    END IF
+END SEQUENCE
+'-------------END--------------DOORS------------------------------------------------------------'  
+
+
+
+'---------------------------WEIGHT-CONTROL------------------------------------------------------------'  
+SEQUENCE DisableControls FOR Elevator
+    READ The Weight_sensor
+        IF The Weight IS GREATER THAN The Max Capacity THEN
+            Open the Elevator Doors And Disable every controls UNTIL the Weight is LESS THAN the max_capacity
+    END FOR
+    END IF
+END SEQUENCE
+'---------------------------WEIGHT-CONTROL------------------------------------------------------------'  
+
+
+
+'----------------------------FLOOR-DISPLAY------------------------------------------------------------'  
+SEQUENCE UpdateDisplay FOR FloorDisplay
+    DISPLAY The Current Floor Of the Elevator ON The FloorDisplay Screen 
+    END FOR
+END SEQUENCE
+'-------------------END---------FLOOR-DISPLAY------------------------------------------------------------'  
+
+
+
+'----------------------------UPBUTTON-WITH-DIRECTIONS------------------------------------------------------------'  
+SEQUENCE UPButton USING Elevator and RequestedFloor
+    IF The Floor Where the Elevator IS Requested IS BETWEEN 1 TO -6 THEN
+        COMPUTE The Number Of Floors Between All The Elevators OF Column 1 That Are going Up And Where the Button has been Pressed THEN
+            READ The result THEN READ The FloorList OF All Elevators THEN
+                DETERMINE The Best Elevator to Send TO The Request From Column 1 BY Returning The Elevator With
+                    The Shortest Floor List AND The Shortest Distance AND The Least Weight
+    ELSE
+
+    IF The Floor Where the Elevator IS Requested IS BETWEEN 2 TO 20 THEN
+        COMPUTE The Number Of Floors Between All The Elevators OF Column 2 That Are going Up And Where the Button has been Pressed THEN
+            READ The result THEN READ The FloorList OF All Elevators THEN
+                DETERMINE The Best Elevator to Send TO The Request From Column 2 BY Returning The Elevator With
+                    The Shortest Floor List AND The Shortest Distance AND The Least Weight
+    ELSE
+
+    IF The Floor Where the Elevator IS Requested IS BETWEEN 21 TO 40 THEN
+        COMPUTE The Number Of Floors Between All The Elevators OF Column 3 That Are going Up And Where the Button has been Pressed THEN
+            READ The result THEN READ The FloorList OF All Elevators THEN
+                DETERMINE The Best Elevator to Send TO The Request From Column 3 BY Returning The Elevator With
+                    The Shortest Floor List AND The Shortest Distance AND The Least Weight
+    ELSE
+
+    IF The Floor Where the Elevator IS Requested IS BETWEEN 41 TO 60 THEN
+        COMPUTE The Number Of Floors Between All The Elevators OF Column 4 That Are going Up And Where the Button has been Pressed THEN
+            READ The result THEN READ The FloorList OF All Elevators THEN
+                DETERMINE The Best Elevator to Send TO The Request From Column 4 BY Returning The Elevator With
+                    The Shortest Floor List AND The Shortest Distance AND The Least Weight
+    ELSE
+    END IF
+    END IF
+    END IF
+END SEQUENCE
+'----------------END------------UPBUTTON-WITH-DIRECTIONS------------------------------------------------------------'  
+
+
+
+'----------------------------DOWNBUTTON-WITH-DIRECTIONS------------------------------------------------------------'  
+SEQUENCE DOWNButton USING Elevator and RequestedFloor
+    IF The Floor Where the Elevator IS Requested IS BETWEEN 1 AND -6 THEN
+        COMPUTE The Number Of Floors Between All The Elevators OF Column 1 That Are going Down And Where the Button has been Pressed THEN
+            READ The result THEN READ The FloorList OF All Elevators THEN
+                DETERMINE The Best Elevator to Send TO The Request From Column 1 BY Returning The Elevator With
+                    The Shortest Floor List AND The Shortest Distance AND The Least Weight
+    ELSE
+
+    IF The Floor Where the Elevator IS Requested IS BETWEEN 2 AND 20 THEN
+        COMPUTE The Number Of Floors Between All The Elevators OF Column 2 That Are going Down And Where the Button has been Pressed THEN
+            READ The result THEN READ The FloorList OF All Elevators THEN
+                DETERMINE The Best Elevator to Send TO The Request From Column 2 BY Returning The Elevator With
+                    The Shortest Floor List AND The Shortest Distance AND The Least Weight
+    ELSE
+
+    IF The Floor Where the Elevator IS Requested IS BETWEEN 21 AND 40 THEN
+        COMPUTE The Number Of Floors Between All The Elevators OF Column 3 That Are going Down And Where the Button has been Pressed THEN
+            READ The result THEN READ The FloorList OF All Elevators THEN
+                DETERMINE The Best Elevator to Send TO The Request From Column 3 BY Returning The Elevator With
+                    The Shortest Floor List AND The Shortest Distance AND The Least Weight
+    ELSE
+
+    IF The Floor Where the Elevator IS Requested IS BETWEEN 41 AND 60 THEN
+        COMPUTE The Number Of Floors Between All The Elevators OF Column 4 That Are going Down And Where the Button has been Pressed THEN
+            READ The result THEN READ The FloorList OF All Elevators THEN
+                DETERMINE The Best Elevator to Send TO The Request From Column 4 BY Returning The Elevator With
+                    The Shortest Floor List AND The Shortest Distance AND The Least Weight
+    ELSE
+    END IF
+    END IF
+    END IF
+END SEQUENCE
+'--------------------END--------DOWNBUTTON-WITH-DIRECTIONS------------------------------------------------------------'  
+
+
+
+'----------------------------OPEN-AND-CLOSE-BUTTONS------------------------------------------------------------'  
+SEQUENCE b_ClosedPressed FOR Elevator
+    When The CloseDoor Button Is Pressed Do nothing
+END SEQUENCE
+
+
+SEQUENCE b_OpenPressed FOR Elevator
+    When The OpenDoor Button is Held Open The doors Until the Button Is released
+END SEQUENCE
+'--------------------END--------OPEN-AND-CLOSE-BUTTONS------------------------------------------------------------'  

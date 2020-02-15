@@ -1,0 +1,292 @@
+                        '--------------------------------------------------------------------'
+                '------------------------------ LISTING AND LEXIQUE -------------------------------' 
+
+                        'WELCOME TO ROCKET ELEVATORS PSEUDO CODE FOR RESIDENTIAL BUILDING'                    
+                                  'Developped by Lou Casenaz & Pavlo Gordiy & ALEXI'
+
+                        '--------------------------------------------------------------------'
+                        '------------------------- DOCUMENTATION ----------------------------' 
+
+'--------------------- COLUMN OBJECT --------------------------------------------------------' 
+'---- COLUMN PROPERTY ----'
+column : Function
+batterySystem{true,false} : Boolean Function
+elevatorsCab : Function
+
+'---- COLUMN EVENT -------'
+operationnal : batterySystem status
+non_operationnal batterySystem status
+
+
+'--------------------- ELEVATOR OBJECTS-------------------------------------------------------'                                  
+'---- ELEVATOR PROPERTY ----'
+goToFloor() : Function
+stop() : Function
+currentFloor() : Function
+goingUpIndicator() : Function
+goingDownIndicator() : Function
+capacity_Control() : Function
+destinationDirection {true,false} : Boolean Function  
+destinationQueue[] : Array, increment by users
+checkDestinationQueue : Function
+getPressedFloors : Function
+openDoorButton : 
+closeDoorButton :
+priorityDeployment : For each cab, set a priority of operating floor
+totalTime() : Increment with destinations + floor + bucket_of_destination
+timeTraject() : Every that who composed a traject
+findBestElevator[] : Array of elevatorCab
+
+'---- ELEVATOR EVENT ----'                               
+idle : Triggered when the elevator has completed all its tasks and is not doing anything
+elevator_button_pressed : Triggered when a passenger has pressed a button inside the elevator
+passing_floor : Triggered slightly before the elevator will pass a floor. A good time to decide whether to stop at that floor
+stopped_at_floor : Triggered when the elevator has arrived at a floor
+light = "ON" :
+screen_display = "ON" :
+security_camera = "ON" :
+floor.origin_position : 1 TO 10 : On elervatorCab[E1,E2]
+time_between_floors <3000ms> : Temps entre chaque étage : total = 27 secondes
+door_held_pressed_open : "ON"
+open_doors <2000ms> : Process of openning time door before fully opened 
+open_doors_timer <2000ms> : Openning time door after arrival
+close_doors <2000ms> : Process of closing time door before fully closed
+close_doors_timer <2000ms> : Closing time door before departure
+origin_position : Return elevator to origin position after if no request
+direction : Set differents directions from buttons pressed
+assignment_priority_floors : For each elevatorCab a serie of floors are assigned
+
+
+
+'--------------------- FLOOR OBJECT -----------------------------------------------------------'  
+'---- FLOOR PROPERTY ----'                               
+floorNum : Function
+
+'---- FLOOR EVENT -------''     
+floor_button_pressed : Triggered when a passenger has pressed a button outside the elevator                          
+up_button_pressed : Triggered when someone has pressed the up button at a floor
+down_button_pressed ; Triggered when someone has pressed the down button at a floor
+
+
+
+
+'--------------------- GLOBAL ELEVATOR SETTINGS -----------------------------------------------------------'  
+SEQUENCE Global_Settings_Of_Elevators
+        SET column USING batterySystem     
+        SET column TO 2
+        SET elevatorsCab TO 2  THEN
+            SET E1 [
+                    INIT batterySystem IF true THEN
+                        SET elevatorStatus TO idle
+                        SET assignment_priority_floors : 1 TO 5
+                        SET light TO ON
+                        SET screen_display TO ON
+                        SET security_camera TO ON
+                        SET floor.origin_position TO 1
+                        SET time_between_floors TO <3000ms> 
+                        SET open_doors TO <2000ms>  
+                        SET open_doors_timer TO <2000ms> 
+                        SET close_doors TO <2000ms>  
+                        SET close_doors_timer TO <2000ms> 
+                    ]
+            
+            SET E2 [
+                    INIT batterySystem IF true THEN 
+                        SET elevatorStatus TO idle
+                        SET assignment_priority_floors : 1 AND 6 TO 10
+                        SET open_light TO ON
+                        SET screen_display TO ON
+                        SET security_camera TO ON
+                        SET floor.origin_position TO 1
+                        SET time_between_floors TO <3000ms> 
+                        SET open_doors TO <2000ms>  
+                        SET open_doors_timer TO <2000ms> 
+                        SET close_doors TO <2000ms>  
+                        SET close_doors_timer TO <2000ms> 
+                    ]
+END SEQUENCE
+'--------END----------- GLOBAL ELEVATOR SETTINGS -----------------------------------------------------------'  
+
+
+
+                        '----------------------------------------------------------------------'
+                            '----------------------------- READY --------------------------'   
+'----------------------------------BATTERY-INIT---------------------------------------------------' 
+SEQUENCE Battery_INIT
+    CALL column
+        DECLARE batterySystem IN elevatorCab
+            IF batterySystem RETURNING true  
+                SET TO operationnal 'Battery is ON'
+            ELSE 
+                SET TO non_operationnal 'Battery is OFF'
+            END IF
+END SEQUENCE
+'------------------------END--------BATTERY-INIT---------------------------------------------------' 
+
+
+
+'--------------------- DISPLAY FLOOR ---------------------------------------------------------------------------' 
+SEQUENCE screen_display USING currentFloor()
+    FOR EACH floor  
+         SHOW displayFloor = currentFloor()
+END SEQUENCE
+'-----------END------- DISPLAY FLOOR ---------------------------------------------------------------------------' 
+
+
+
+'--------------------- SECURITY CAMERA  ------------------------------------------------------------------------' 
+SEQUENCE security_camera 
+    SET cameraRecording TO ON 
+END SEQUENCE
+'----------END-------- SECURITY CAMERA  ------------------------------------------------------------------------' 
+
+
+
+'--------------------- CAPACITY CONTROL ------------------------------------------------------------------------' 
+SEQUENCE capacity_Control USING elevatorStatus AND weightScale
+    WHEN selectPositionFloor IS pressed
+        CALL weightScale THEN 
+            READ weightScale.result
+                IF weightScale.result >= elevatorStatus.maxCapacity THEN
+                    SET elevatorStatus TO Idle 
+                    REPEAT UNTIL weightScale.result < elevatorStatus.maxCapacity
+                END IF
+END SEQUENCE
+'-------------END----- CAPACITY CONTROL ------------------------------------------------------------------------' 
+
+
+
+'----------------------------------BASIC-TRAJECT-TO-DESTINATION---------------------------------------------------' 
+SEQUENCE Basic_Traject_To_Destination USING column, direction AND floor
+    DECLARE goToFloor()
+        CALL elevatorCab IN column
+        WHILE currentFloor() 
+            IF goToFloor() <> currentFloor() THEN
+                INCREMENT or DECREMENT currentFloor()
+                    UNTIL goToFloor() = currentFloor()
+                        THEN stopped_at_floor
+            END IF
+        END WHILE     
+END SEQUENCE
+'------------------------END--------BASIC-TRAJECT-TO-DESTICATION---------------------------------------------------' 
+
+
+'---------------------------------CALCULATE-BASIC-TRAJCET-TIME---------------------------------------------------' 
+SEQUENCE Calculate_Basic_Traject_Time USING direction, column AND floor
+    DECLARE timeTraject
+        IF elevatorCab IS moving
+            FROM elevatorCab.idle 
+                COMPUTE close_doors + time_between_floors + open_doors + close_doors THEN
+                    RETURN timeTraject()
+        END IF
+END SEQUENCE
+'------------------------END--------CALCULATE-BASIC-TRAJCET-TIME---------------------------------------------------' 
+
+
+
+'----------------------------------PRIORITY-CAB---------------------------------------------------' 
+SEQUENCE Priority_Deployment_Cab USING column, direction AND floor 'when elevators have the same position, are idle'
+    DECLARE priorityDeployment
+        CALL priority_floors_deployment 
+            FOR EACH elevatorCab 
+                CALL assignment_priority_floors
+            END FOR
+END SEQUENCE
+'------------------------END--------PRIORITY-CAB---------------------------------------------------' 
+
+
+
+'----------------------------------TRAVEL-DIRECTION---------------------------------------------------' 
+SEQUENCE Travel_Direction USING column, direction AND floor
+    DECLARE destinationDirection
+        FOR EACH elevatorCab IN column WITH direction WHEN floor_button_pressed
+
+            SET travel_direction WITH goingUpIndicator
+                WHILE goingUpIndicator WHEN up_button_pressed THEN
+                    CALL upButtonPressed() 'value set by the user'
+                    CALL destinationDirection 'boolean function'
+                        IF floor.upButtonPressed() > elevator.goingUpIndicator()
+                            THEN destinationDirection = true
+                        END IF
+                        ELSE
+                            THEN destinationDirection = false
+                                ELSE IF downButtonPressed() > elevator.goingUpIndicator()
+                                    THEN destinationDirection = false
+                                    UNTIL goingUpIndicator() stopped_at_floor
+                                END IF
+                END WHILE
+
+            SET travel_direction WITH goingDownIndicator
+                WHILE goingDownIndicator WHEN down_button_pressed THEN
+                    CALL downButtonPressed() 'value set by the user'
+                    CALL destinationDirection 'boolean function'
+                        IF floor.downButtonPressed() < elevator.goingDownIndicator()
+                            THEN destinationDirection = true
+                        END IF
+                        ELSE
+                            THEN destinationDirection = false
+                                ELSE IF upButtonPressed() < elevator.goingDownIndicator()
+                                    THEN destinationDirection = false
+                                    UNTIL goingDownIndicator() stopped_at_floor
+                                END IF
+                END WHILE
+        END FOR
+
+END SEQUENCE
+'------------------------END--------TRAVEL-DIRECTION---------------------------------------------------' 
+
+
+
+'----------------------------------LIST-QUEUE-CALCULATION---------------------------------------------------' 
+SEQUENCE Calculate_List_Queue USING checkDestinationQueue, column, direction AND floor
+    DECLARE destinationQueue
+        CALL checkDestinationQueue()
+        FOR EACH elevatorCab WITH floor_button_pressed AND elevator_button_pressed
+            READ bucket_of_destination()
+                IF floor_button_pressed OR elevator_button_pressed
+                    CALCULATE INCREMENT in bucket_of_destination()
+                END IF
+        END FOR
+END SEQUENCE
+'------------------------END--------LIST-QUEUE-CALCULATION---------------------------------------------------' 
+
+
+
+'---------------------------------CALCULATE-TIME-FROM-LIST-QUEUE---------------------------------------------------' 
+SEQUENCE Calculate_Time_From_List_Queue USING bucket_of_destination, column AND floor
+    DECLARE totalTime()
+        FOR EACH elevatorCab
+            READ checkDestinationQueue() THEN
+            COMPUTE bucket_of_destination() * timeTraject()
+                RETURN totalTime()
+        END FOR
+END SEQUENCE 
+'-------------------------END-----CALCULATE-TIME-FROM-LIST-QUEUE---------------------------------------------------' 
+
+
+
+'---------------------------------FIND-BEST-ELEVATOR---------------------------------------------------' 
+SEQUENCE Find_Best_Elevator USING column, direction AND floor
+    DECLARE findBestElevator[E1,E2]
+        FOR EACH elevatorCab IN column
+            CALL totalTime() 
+                IF E1.totalTime() < E2.totalTime()
+                    CALL E1
+                        ELSE 
+                        CALL E2
+                END IF
+        END FOR           
+END SEQUENCE 
+'--------------------------END----FIND-BEST-ELEVATOR---------------------------------------------------' 
+
+
+
+'---------------------------------SELECT-BEST-ELEVATOR---------------------------------------------------' 
+SEQUENCE Select_Best_Elevator USING direction, floor AND totalTime 
+        DECLARE selectBestElevator WITH totalTime()
+    READ findBestElevator THEN
+        RETURN selectBestElevator
+    SET elevatorStatus TO idle
+END SEQUENCE
+'-------------------------END-----SELECT-BEST-ELEVATOR---------------------------------------------------' 
+
