@@ -1,0 +1,17 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commercial_Controller_CS", "Commercial_Controller_CS\Commercial_Controller_CS.csproj", "{578AF8B8-03E4-424F-A621-4F3AB0A75775}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{578AF8B8-03E4-424F-A621-4F3AB0A75775}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{578AF8B8-03E4-424F-A621-4F3AB0A75775}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{578AF8B8-03E4-424F-A621-4F3AB0A75775}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{578AF8B8-03E4-424F-A621-4F3AB0A75775}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

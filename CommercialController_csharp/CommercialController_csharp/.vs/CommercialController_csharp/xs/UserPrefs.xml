@@ -1,0 +1,25 @@
+﻿<Properties StartupConfiguration="{1C2D01B4-2BF7-4D2A-8D84-4D463D8CB33E}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="CommercialBuilding.cs">
+    <Files>
+      <File FileName="CommercialBuilding.cs" Line="1" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="CommercialController_csharp" expanded="True">
+            <Node name="CommercialController_csharp" expanded="True">
+              <Node name="CommercialBuilding.cs" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.CommercialController__csharp PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>
